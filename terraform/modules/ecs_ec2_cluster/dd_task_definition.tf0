@@ -1,0 +1,197 @@
+resource "aws_ecs_task_definition" "datadog_windows" {
+  count = var.operating_system == "windows" ? 1 : 0
+  family                   = local.dd_name_prefix
+  execution_role_arn       = aws_iam_role.datadog.arn
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["EC2"]
+  tags                     = var.tags
+  container_definitions = jsonencode([
+    {
+      name      = "datadog-agent",
+      image     = "public.ecr.aws/datadog/agent:latest"
+      cpu       = 512
+      memory    = 512
+      essential = true
+      portMappings = [
+        {
+          containerPort = 8126
+          hostPort      = 8126
+          protocol      = "tcp"
+        }
+      ]
+      environment = [
+        {
+          name  = "DD_SITE"
+          value = "us5.datadoghq.com"
+        },
+        {
+            name = "DD_ENV"
+            value = var.tags.Environment
+        },
+        {
+            name = "DD_COLLECT_ECS_METADATA"
+            value = "true"
+        },
+        {
+            name = "DD_ECS_FARGATE"
+            value = "false"
+        },        
+        {
+            name = "DD_LOGS_ENABLED"
+            value = "true"
+        },
+        {
+            name = "DD_PROCESS_AGENT_ENABLED"
+            value = "true"
+        },
+        {
+            name = "DD_TAGS"
+            value = "cluster_name:${aws_ecs_cluster.main.name}"
+        }
+      ]
+      secrets = [
+        {
+          name      = "DD_API_KEY"
+          valueFrom = "/common/datadog/DD_API_KEY"
+        }
+      ]
+      mountPoints = [
+        {
+          sourceVolume = "docker_sock"
+          containerPath = "\\\\.\\pipe\\docker_engine"
+          readOnly = null
+        }
+      ]
+      volumesFrom = []
+      healthCheck = {
+        command     = ["CMD-SHELL","agent health"]
+        interval    = 30
+        timeout     = 5
+        retries     = 3
+        startPeriod = 15
+      }
+    }
+  ])
+
+  volume {
+    name      = "docker_sock"
+    host_path = "\\\\.\\pipe\\docker_engine"
+  }
+}
+
+resource "aws_ecs_task_definition" "datadog_linux" {
+  count = var.operating_system == "linux" ? 1 : 0
+  family                   = local.dd_name_prefix
+  execution_role_arn       = aws_iam_role.datadog.arn
+  network_mode             = "bridge"
+  requires_compatibilities = ["EC2"]
+  tags                     = var.tags
+  container_definitions = jsonencode([
+    {
+      name      = "datadog-agent",
+      image     = "public.ecr.aws/datadog/agent:latest"
+      cpu       = 100
+      memory    = 512
+      essential = true
+      portMappings = [
+        {
+          containerPort = 8126
+          hostPort      = 8126
+          protocol      = "tcp"
+        }
+      ]
+      environment = [
+        {
+          name  = "DD_SITE"
+          value = "us5.datadoghq.com"
+        },
+        {
+            name = "DD_ENV"
+            value = var.tags.Environment
+        },
+        {
+            name = "DD_COLLECT_ECS_METADATA"
+            value = "true"
+        },
+        {
+            name = "DD_LOGS_ENABLED"
+            value = "true"
+        },
+        {
+            name = "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL"
+            value = "true"
+        },
+        {
+            name = "DD_PROCESS_AGENT_ENABLED"
+            value = "true"
+        }
+      ]
+      secrets = [
+        {
+          name      = "DD_API_KEY"
+          valueFrom = "/common/datadog/DD_API_KEY"
+        }
+      ]
+      mountPoints = [
+        {
+          sourceVolume = "docker_sock"
+          containerPath = "/var/run/docker.sock"
+          readOnly = null
+        },
+        {
+          sourceVolume = "proc"
+          containerPath = "/proc/"
+          readOnly = null
+        },
+        {
+          sourceVolume = "cgroup"
+          containerPath = "/cgroup/"
+          readOnly = null
+        },
+        {
+          sourceVolume = "pointdir"
+          containerPath = "/opt/datadog-agent/run"
+          readOnly = false
+        },
+        {
+          sourceVolume = "containers_root",
+          containerPath = "/var/lib/docker/containers",
+          readOnly = true
+        }
+      ]
+      volumesFrom = []
+      healthCheck = {
+        command     = ["CMD-SHELL","agent health"]
+        interval    = 30
+        timeout     = 5
+        retries     = 3
+        startPeriod = 15
+      }
+    }
+  ])
+
+  volume {
+    name      = "docker_sock"
+    host_path = "/var/run/docker.sock"
+  }
+
+  volume {
+    name      = "proc"
+    host_path = "/proc/"
+  }
+
+  volume {
+    name      = "cgroup"
+    host_path = "/cgroup/"
+  }
+
+  volume {
+    name      = "pointdir"
+    host_path = "/opt/datadog-agent/run"
+  }
+
+  volume {
+    name      = "containers_root"
+    host_path = "/var/lib/docker/containers/"
+  }
+}
