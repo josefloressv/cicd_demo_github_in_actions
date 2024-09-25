@@ -39,10 +39,10 @@ jobs:
         - name: Checkout code
           uses: actions/checkout@v4 # https://github.com/actions/checkout
 
-        - name: Use Node.js $NODE_VERSION
-          uses: actions/setup-node@v4
-          with:
-            node-version: $NODE_VERSION
+        # - name: Use Node.js $NODE_VERSION
+        #   uses: actions/setup-node@v4
+        #   with:
+        #     node-version: $NODE_VERSION
 
         - name: Setup QEMU
           uses: docker/setup-qemu-action@v3 # https://github.com/docker/setup-qemu-action
