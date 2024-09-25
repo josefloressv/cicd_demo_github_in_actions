@@ -21,10 +21,10 @@ task_placement_strategy_rules = [
 
 # Lb listener
 lb_listener_rule_host_header  = ["905418204391.realhandsonlabs.net"]
-lb_listener_rule_path_pattern = ["/"]
+lb_listener_rule_path_pattern = ["/*"]
 
 # Target Group
-tg_protocol                         = "HTTPS"
+tg_protocol                         = "HTTP"
 tg_deregistration_delay             = 10 # seconds
 tg_slow_start                       = 30 # seconds
 tg_health_check_interval            = 10 # seconds
@@ -32,10 +32,10 @@ tg_health_check_timeout             = 5  # seconds
 tg_health_check_healthy_threshold   = 2
 tg_health_check_unhealthy_threshold = 4
 tg_health_check_matcher             = "200"
-tg_health_check_path                = "/"
+tg_health_check_path                = "/health"
 
 # Container Health Check
-container_check_path         = "/"
+container_check_path         = "/health"
 container_check_start_period = 40 # seconds
 container_check_interval     = 10 # seconds
 container_check_timeout      = 5  # seconds

@@ -24,7 +24,7 @@ app.get("/dashboard", (req, res) => {
 });
 
 app.listen(80, () => {
-  console.log(getTimestampLog() +" App listening on port 3000!");
+  console.log(getTimestampLog() +" App listening on port 80!");
 });
 
 function getTimestampLog() {
