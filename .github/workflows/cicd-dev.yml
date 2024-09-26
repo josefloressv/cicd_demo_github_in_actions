@@ -13,6 +13,8 @@ on:
   push:
     branches:
         - "**"
+    paths:
+      - 'app/**'
 
 jobs:
   deploy_to_dev:

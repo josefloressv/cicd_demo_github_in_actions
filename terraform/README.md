@@ -12,7 +12,7 @@ aws s3api create-bucket \
 aws s3api put-bucket-versioning --bucket cloudnativesv-terraform-dev --versioning-configuration Status=Enabled
 
 ````
-
+test
 # Snippets
 
 ## Set and test AWS Credentials

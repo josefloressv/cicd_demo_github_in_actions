@@ -1,0 +1,57 @@
+# Run Terraform plan
+# Run the terraform plan for the directory specified
+#
+# To use this workflow, you must configure the following GHA Jobs secrets: 
+# AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+
+name: x-template - Terraform plan
+
+on:
+  workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_REGION:
+        required: true
+    inputs:
+      layer:
+        description: 'Terraform folder layer'
+        required: true
+        type: string
+      environment:
+        description: 'Environment'
+        required: true
+        type: string
+
+# Variables available to all jobs defined in this file
+env:
+  # TF_LOG: trace
+  TF_VERSION: 1.8.4
+  ENVIRONMENT: ${{inputs.environment}}
+  TF_LAYER: ${{inputs.layer}}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  apply:
+    name: plan ${{ inputs.layer }}
+    runs-on: ubuntu-latest
+    environment: ${{inputs.environment}}-approval
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+            terraform_version: $TF_VERSION
+  
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4 # https://github.com/aws-actions/configure-aws-credentials
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Plan
+        run: |
+          ./deploy-infra.sh $TF_LAYER $ENVIRONMENT apply

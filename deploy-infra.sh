@@ -50,12 +50,12 @@ fi
 # Install Terraform using tfenv
 # ----------------------------------------------------------------
 # Check if current Terraform version matches required version
-CURRENT_TF_VERSION=$(terraform version -json | jq -r '.terraform_version')
-if [ "$CURRENT_TF_VERSION" != "$TF_VERSION" ]; then
-  # Install Terraform using tfenv
-  echo "Installing Terraform $TF_VERSION..."
-  tfenv use "$TF_VERSION"
-fi
+# CURRENT_TF_VERSION=$(terraform version -json | jq -r '.terraform_version')
+# if [ "$CURRENT_TF_VERSION" != "$TF_VERSION" ]; then
+#   # Install Terraform using tfenv
+#   echo "Installing Terraform $TF_VERSION..."
+#   tfenv use "$TF_VERSION"
+# fi
 
 # ----------------------------------------------------------------
 # Terraform commands

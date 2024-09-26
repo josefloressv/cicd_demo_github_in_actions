@@ -7,7 +7,7 @@ app.get("/", (req, res) => {
 
 app.get("/", (req, res) => {  
   console.log(getTimestampLog() + " procesando peticion...");
-  res.send("Hola Comunidad!");
+  res.send("Hola Comunidad Sept 2024!");
 });
 
 app.get("/cncf", (req, res) => {  
